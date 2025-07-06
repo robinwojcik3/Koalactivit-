@@ -23,3 +23,16 @@ Ce dépôt contient une ébauche d'application visant à identifier des lieux fa
 ## Démarrage de FloreApp
 
 Le dossier [`FloreApp`](FloreApp/) contient les premiers scripts et la documentation pour démarrer l'application.
+
+## Déploiement sur Netlify
+
+Une configuration minimale est fournie pour mettre l'application en ligne. Le dossier `site` contient la page web et les fonctions Netlify se trouvent dans `netlify/functions`.
+
+1. Installez les dépendances Node :
+   ```bash
+   npm install
+   ```
+2. Configurez les variables d'environnement requises (`GITHUB_TOKEN`, `REPO_OWNER`, `REPO_NAME`) dans l'interface Netlify.
+3. Déployez le dépôt sur Netlify. Aucun processus de build complexe n'est nécessaire, la commande `npm run build` ne fait qu'indiquer la fin du build.
+
+L'application sera accessible depuis l'URL fournie par Netlify et permettra de tracer puis sauvegarder un itinéraire directement dans votre dépôt GitHub.
