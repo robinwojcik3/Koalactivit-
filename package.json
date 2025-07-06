@@ -1,0 +1,17 @@
+{
+  "name": "koalactivit-",
+  "version": "1.0.0",
+  "description": "Ce dépôt contient une ébauche d'application visant à identifier des lieux favorables aux activités de Koala (FloreApp) et à enregistrer des itinéraires personnalisés.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@octokit/rest": "^22.0.0"
+  }
+}
