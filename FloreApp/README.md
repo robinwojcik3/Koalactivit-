@@ -25,6 +25,7 @@ pip install -r requirements.txt
 ## Structure du dépôt
 
 - `gbif_hotspots.py` : récupère les données GBIF et calcule les zones de forte concentration d'espèces.
+- `gbif_hotspots.py` : récupère les données GBIF et calcule les zones de forte concentration d'espèces. Génère un fichier `hotspots.geojson` contenant les dix secteurs les plus propices.
 - `interactive_map.py` : prototype de carte interactive pour tracer et sauvegarder des itinéraires.
 - `requirements.txt` : liste des dépendances Python.
 

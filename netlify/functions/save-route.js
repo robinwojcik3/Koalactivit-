@@ -8,7 +8,12 @@ exports.handler = async (event) => {
   const token = process.env.GITHUB_TOKEN;
   const owner = process.env.REPO_OWNER;
   const repo = process.env.REPO_NAME;
-  const path = process.env.FILE_PATH || 'itineraries/route.geojson';
+  let path = process.env.FILE_PATH;
+  if (!path) {
+    const now = new Date();
+    const ts = now.toISOString().replace(/[:.]/g, '-');
+    path = `itineraries/route-${ts}.geojson`;
+  }
 
   if (!token || !owner || !repo) {
     return { statusCode: 500, body: 'Missing GitHub configuration' };
@@ -32,7 +37,7 @@ exports.handler = async (event) => {
       owner,
       repo,
       path,
-      message: 'Add route',
+      message: `Add route ${path}`,
       content,
       sha,
     });
