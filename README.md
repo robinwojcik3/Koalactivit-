@@ -12,6 +12,8 @@ Ce dépôt contient une ébauche d'application visant à identifier des lieux fa
 4. **Extraction des hotspots** : isoler les cellules dépassant un seuil de haute densité (ex. 95ᵉ percentile) et les convertir en polygones pour délimiter les hotspots.
 5. **Classement et sélection** : attribuer un score à chaque polygone de hotspot (densité moyenne, nombre de points, etc.) et sélectionner les dix meilleurs.
 
+Un script Python (`FloreApp/gbif_hotspots.py`) automatise ces étapes et produit un fichier `hotspots.geojson`.
+
 ### Partie 2 : Création et Sauvegarde des Itinéraires
 
 6. **Interface cartographique** : mettre en place une carte interactive (Leaflet.js ou équivalent) permettant à l'utilisateur de dessiner une ligne.
@@ -23,6 +25,11 @@ Ce dépôt contient une ébauche d'application visant à identifier des lieux fa
 ## Démarrage de FloreApp
 
 Le dossier [`FloreApp`](FloreApp/) contient les premiers scripts et la documentation pour démarrer l'application.
+
+Une commande utilitaire `gbif_hotspots.py` permet de télécharger les occurrences
+des espèces de plantes utilisées par les koalas via l'API GBIF puis de calculer
+les dix zones de plus forte densité. Le résultat est sauvegardé dans
+`hotspots.geojson` et peut être affiché sur la carte web.
 
 ## Déploiement sur Netlify
 

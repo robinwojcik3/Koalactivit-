@@ -3,6 +3,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// Affiche les hotspots s'ils existent
+fetch('hotspots.geojson')
+  .then((r) => r.json())
+  .then((geo) => {
+    L.geoJSON(geo, { style: { color: 'red' } }).addTo(map);
+  })
+  .catch(() => {
+    console.log('Aucun fichier hotspots.geojson trouvé');
+  });
+
 const drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
