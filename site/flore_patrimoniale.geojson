@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Espèce A",
+        "determ_znieff_only": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.35, 48.85]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Espèce B",
+        "determ_znieff_only": false
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.36, 48.86]
+      }
+    }
+  ]
+}
