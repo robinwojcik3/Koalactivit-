@@ -22,6 +22,41 @@ const drawControl = new L.Control.Draw({
 });
 map.addControl(drawControl);
 
+// Stocke les couches correspondant aux espèces uniquement déterminantes ZNIEFF
+const znieffLayers = [];
+
+// Charge la flore patrimoniale et ajoute les points sur la carte
+fetch('flore_patrimoniale.geojson')
+  .then((r) => r.json())
+  .then((geo) => {
+    L.geoJSON(geo, {
+      onEachFeature: (feature, layer) => {
+        if (feature.properties && feature.properties.name) {
+          layer.bindPopup(feature.properties.name);
+        }
+        if (feature.properties && feature.properties.zn_only) {
+          znieffLayers.push(layer);
+        }
+      }
+    }).addTo(map);
+  })
+  .catch(() => {
+    console.log('Aucun fichier flore_patrimoniale.geojson trouv\u00e9');
+  });
+
+let znieffVisible = true;
+document.getElementById('toggle-znieff').addEventListener('click', () => {
+  if (znieffLayers.length === 0) return;
+  if (znieffVisible) {
+    znieffLayers.forEach((lyr) => map.removeLayer(lyr));
+    document.getElementById('toggle-znieff').textContent = 'Afficher les esp\u00e8ces ZNIEFF uniquement';
+  } else {
+    znieffLayers.forEach((lyr) => lyr.addTo(map));
+    document.getElementById('toggle-znieff').textContent = 'Masquer les esp\u00e8ces ZNIEFF uniquement';
+  }
+  znieffVisible = !znieffVisible;
+});
+
 map.on(L.Draw.Event.CREATED, function (event) {
   const layer = event.layer;
   drawnItems.clearLayers();

@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Esp\u00e8ce A",
+        "zn_only": true
+      },
+      "geometry": {"type": "Point", "coordinates": [2.4, 46.6]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Esp\u00e8ce B",
+        "zn_only": false
+      },
+      "geometry": {"type": "Point", "coordinates": [2.35, 46.45]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Esp\u00e8ce C",
+        "zn_only": true
+      },
+      "geometry": {"type": "Point", "coordinates": [2.6, 46.55]}
+    }
+  ]
+}
