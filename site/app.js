@@ -13,6 +13,19 @@ fetch('hotspots.geojson')
     console.log('Aucun fichier hotspots.geojson trouvé');
   });
 
+let znieffOnlyLayer;
+fetch('flore_patrimoniale.geojson')
+  .then((r) => r.json())
+  .then((geo) => {
+    znieffOnlyLayer = L.geoJSON(geo, {
+      filter: (feat) => feat.properties.determ_znieff_only,
+      pointToLayer: (feature, latlng) => L.marker(latlng),
+    }).addTo(map);
+  })
+  .catch(() => {
+    console.log('Aucun fichier flore_patrimoniale.geojson trouvé');
+  });
+
 const drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -44,5 +57,16 @@ document.getElementById('save').addEventListener('click', async () => {
   } else {
     const text = await response.text();
     alert('Erreur: ' + text);
+  }
+});
+
+document.getElementById('toggle-znieff').addEventListener('click', function () {
+  if (!znieffOnlyLayer) return;
+  if (map.hasLayer(znieffOnlyLayer)) {
+    map.removeLayer(znieffOnlyLayer);
+    this.textContent = 'Afficher ZNIEFF uniquement';
+  } else {
+    map.addLayer(znieffOnlyLayer);
+    this.textContent = 'Masquer ZNIEFF uniquement';
   }
 });
