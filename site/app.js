@@ -117,7 +117,7 @@ const PREDEFINED_SPECIES = [
 
 let selectedPoint = null; // Stocke les coordonnées du point sélectionné par clic droit
 let selectedPointMarker = null; // Marqueur visuel pour le point sélectionné
-const ANALYSIS_RADIUS_KM = 10; // Rayon de 10 km pour l'analyse (MODIFIÉ)
+const ANALYSIS_RADIUS_KM = 10; // Rayon de 10 km pour l'analyse
 
 // Fonction pour calculer la distance entre deux points (formule de Haversine simplifiée)
 function haversineDistance(coords1, coords2) {
@@ -219,6 +219,7 @@ map.on('contextmenu', async function(e) {
 
     try {
       // Appel à la fonction Netlify pour toutes les espèces prédéfinies
+      // Le paramètre scientificNames doit être un tableau JSON stringifié
       const response = await fetch(`/.netlify/functions/gbif-proxy?scientificNames=${encodeURIComponent(JSON.stringify(PREDEFINED_SPECIES))}`);
       console.log('Réponse du proxy GBIF reçue.');
 
@@ -236,23 +237,27 @@ map.on('contextmenu', async function(e) {
       }
 
       const data = await response.json();
+      // Assurez-vous que data.results est bien un tableau
       const allObservations = Array.isArray(data.results) ? data.results : []; 
       console.log(`Proxy GBIF a agrégé ${allObservations.length} observations au total avant filtrage.`);
 
       if (allObservations.length === 0) {
         statusMessage.textContent = `Aucune observation trouvée pour les espèces prédéfinies.`;
         statusMessage.style.color = 'orange';
+        // Le marqueur du point sélectionné reste visible, pas d'observations à afficher
         return;
       }
 
       console.log(`Filtrage des observations autour de [${selectedPoint.lat}, ${selectedPoint.lng}] avec un rayon de ${ANALYSIS_RADIUS_KM} km.`);
 
       const filteredObservations = allObservations.filter(obs => {
+          // Vérifie si decimalLatitude et decimalLongitude sont des nombres valides
           if (typeof obs.decimalLatitude === 'number' && typeof obs.decimalLongitude === 'number' && !isNaN(obs.decimalLatitude) && !isNaN(obs.decimalLongitude)) {
               const obsCoords = { lat: obs.decimalLatitude, lng: obs.decimalLongitude };
               const distance = haversineDistance(selectedPoint, obsCoords);
               return distance <= ANALYSIS_RADIUS_KM;
           }
+          console.warn('Observation avec coordonnées invalides, ignorée lors du filtrage:', obs);
           return false;
       });
 
@@ -265,6 +270,12 @@ map.on('contextmenu', async function(e) {
       console.error("Erreur lors de la récupération ou de l'analyse des observations:", error);
       statusMessage.textContent = `Erreur lors de l'analyse: ${error.message}`;
       statusMessage.style.color = 'red';
+      // S'il y a une erreur, on retire aussi le marqueur du point sélectionné pour éviter la confusion
+      if (selectedPointMarker) {
+          map.removeLayer(selectedPointMarker);
+          selectedPointMarker = null;
+      }
+      selectedPoint = null;
     }
   });
 
