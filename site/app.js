@@ -57,16 +57,27 @@ document.getElementById('save').addEventListener('click', async () => {
   }
 });
 
-// -- Logique pour l'affichage des observations d'espèces --
+// -- Logique pour l'affichage des observations d'espèces et le filtrage par rayon --
 
 // Variable globale pour stocker toutes les observations récupérées
 let allObservations = [];
-let selectedPoint = null;
+let selectedPoint = null; // Stocke les coordonnées du point sélectionné par clic droit
+let selectedPointMarker = null; // Marqueur visuel pour le point sélectionné
 const ANALYSIS_RADIUS_KM = 40; // Rayon de 40 km pour l'analyse
 
 // Gestion du clic droit pour sélectionner un point d'intérêt
 map.on('contextmenu', function(e) {
   selectedPoint = e.latlng;
+
+  // Supprime l'ancien marqueur si il existe
+  if (selectedPointMarker) {
+    map.removeLayer(selectedPointMarker);
+  }
+  // Ajoute un nouveau marqueur pour le point sélectionné
+  selectedPointMarker = L.marker(selectedPoint).addTo(map)
+    .bindPopup(`Point d'analyse sélectionné ici:<br>Lat: ${selectedPoint.lat.toFixed(4)}, Lng: ${selectedPoint.lng.toFixed(4)}`)
+    .openPopup();
+
   statusMessage.textContent = `Point sélectionné: Latitude ${selectedPoint.lat.toFixed(4)}, Longitude ${selectedPoint.lng.toFixed(4)}. Cliquez sur "Lancer l'analyse de proximité".`;
   statusMessage.style.color = 'blue';
   document.getElementById('analyze-button').disabled = false; // Activer le bouton d'analyse
@@ -83,9 +94,9 @@ document.getElementById('search-species').addEventListener('click', async () => 
   statusMessage.textContent = `Recherche des observations pour "${speciesName}"...`;
   statusMessage.style.color = 'blue';
 
-  // Effacer les marqueurs précédents
+  // Effacer les marqueurs précédents et les observations stockées
   observationMarkers.clearLayers();
-  allObservations = []; // Réinitialiser la liste complète des observations
+  allObservations = []; 
 
   try {
     const response = await fetch(`/.netlify/functions/gbif-proxy?scientificName=${encodeURIComponent(speciesName)}`);
@@ -102,11 +113,15 @@ document.getElementById('search-species').addEventListener('click', async () => 
       return;
     }
 
-    // Afficher toutes les observations initialement
-    displayObservations(allObservations);
-    
-    statusMessage.textContent = `${allObservations.length} observations affichées pour "${speciesName}".`;
+    statusMessage.textContent = `${allObservations.length} observations trouvées pour "${speciesName}". Sélectionnez un point sur la carte pour affiner l'analyse.`;
     statusMessage.style.color = 'green';
+
+    // N'affiche pas toutes les observations par défaut après une recherche,
+    // mais attend le clic sur "Lancer l'analyse de proximité" si un point est sélectionné.
+    // Si aucun point n'est sélectionné, elles peuvent être affichées ou attendre l'action de l'utilisateur.
+    // Pour l'instant, on n'affiche rien tant que l'analyse n'est pas lancée après une sélection de point.
+    // Si vous voulez qu'elles s'affichent toutes par défaut et soient ensuite filtrées, décommentez la ligne ci-dessous :
+    // displayObservations(allObservations);
 
   } catch (error) {
     console.error("Erreur lors de la récupération des observations:", error);
@@ -136,7 +151,13 @@ function haversineDistance(coords1, coords2) {
 
 // Fonction pour afficher les observations sur la carte
 function displayObservations(observationsToDisplay) {
-  observationMarkers.clearLayers();
+  observationMarkers.clearLayers(); // Nettoyer les marqueurs existants
+  if (observationsToDisplay.length === 0) {
+    statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné.`;
+    statusMessage.style.color = 'orange';
+    return;
+  }
+
   observationsToDisplay.forEach(obs => {
     if (obs.decimalLatitude && obs.decimalLongitude) {
       L.circleMarker([obs.decimalLatitude, obs.decimalLongitude], {
@@ -150,14 +171,9 @@ function displayObservations(observationsToDisplay) {
     }
   });
 
+  // Ajuster la vue de la carte pour inclure toutes les observations affichées
   if (observationMarkers.getLayers().length > 0) {
     map.fitBounds(observationMarkers.getBounds().pad(0.1));
-  } else {
-    // Si l'objectif est de ne montrer que les observations filtrées et qu'il n'y en a pas, ce message est pertinent.
-    // Si le message est affiché sans filtre actif, il faut revoir la logique.
-    // Pour l'instant, je le laisse, car il est dans la fonction displayObservations.
-    statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km.`;
-    statusMessage.style.color = 'orange';
   }
 }
 
@@ -170,7 +186,7 @@ document.getElementById('analyze-button').addEventListener('click', () => {
   }
 
   if (allObservations.length === 0) {
-    statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces.';
+    statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces pour pouvoir les filtrer.';
     statusMessage.style.color = 'orange';
     return;
   }
