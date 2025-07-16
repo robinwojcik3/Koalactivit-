@@ -118,10 +118,10 @@ map.on('contextmenu', function(e) {
     console.log('Bouton "OK" du popup cliqué.');
     map.closePopup(popup); // Ferme le popup
 
-    if (allObservations.length === 0) {
+    if (!allObservations || allObservations.length === 0) { // Vérifie si des observations ont été trouvées et stockées
         statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces pour pouvoir les filtrer.';
         statusMessage.style.color = 'orange';
-        console.warn('Tentative d\'analyse sans observations préalablement recherchées (allObservations est vide).');
+        console.warn('Tentative d\'analyse sans observations préalablement recherchées (allObservations est vide ou null).');
         return;
     }
     
@@ -133,12 +133,14 @@ map.on('contextmenu', function(e) {
     console.log(`Filtrage des observations autour de [${selectedPoint.lat}, ${selectedPoint.lng}] avec un rayon de ${ANALYSIS_RADIUS_KM} km.`);
 
     const filteredObservations = allObservations.filter(obs => {
-        if (obs.decimalLatitude && obs.decimalLongitude) {
+        // Vérifie si les coordonnées de l'observation sont valides
+        if (typeof obs.decimalLatitude === 'number' && typeof obs.decimalLongitude === 'number') {
             const obsCoords = { lat: obs.decimalLatitude, lng: obs.decimalLongitude };
             const distance = haversineDistance(selectedPoint, obsCoords);
             // console.log(`Obs: [${obs.decimalLatitude}, ${obs.decimalLongitude}], Dist: ${distance.toFixed(2)} km`); // Débogage des distances
             return distance <= ANALYSIS_RADIUS_KM;
         }
+        console.warn('Observation avec coordonnées invalides, ignorée:', obs); // Log pour déboguer les données corrompues
         return false;
     });
 
@@ -184,13 +186,23 @@ document.getElementById('search-species').addEventListener('click', async () => 
     console.log('Réponse du proxy GBIF reçue.');
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Statut HTTP: ${response.status}, Erreur: ${errorText}`);
+      // Tente de parser l'erreur JSON si c'est le cas, sinon utilise le texte brut
+      let errorMessage = `Statut HTTP: ${response.status}`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.message) errorMessage += `, Erreur: ${errorJson.message}`;
+        else errorMessage += `, Erreur: ${errorText}`;
+      } catch (e) {
+        errorMessage += `, Erreur: ${errorText}`;
+      }
+      throw new Error(errorMessage);
     }
     const data = await response.json();
-    allObservations = data.results; // Stocker toutes les observations récupérées
-    console.log(`GBIF a retourné ${allObservations ? allObservations.length : 0} résultats.`);
+    // Assurez-vous que data.results est un tableau, même s'il est vide ou absent
+    allObservations = Array.isArray(data.results) ? data.results : []; 
+    console.log(`GBIF a retourné ${allObservations.length} résultats.`);
 
-    if (!allObservations || allObservations.length === 0) {
+    if (allObservations.length === 0) {
       statusMessage.textContent = `Aucune observation trouvée pour "${speciesName}".`;
       statusMessage.style.color = 'orange';
       return;
@@ -231,7 +243,7 @@ function haversineDistance(coords1, coords2) {
 // Fonction pour afficher les observations sur la carte
 function displayObservations(observationsToDisplay) {
   observationMarkers.clearLayers(); // Nettoyer les marqueurs existants
-  console.log(`displayObservations: Affichage de ${observationsToDisplay.length} observations.`);
+  console.log(`displayObservations: Tentative d'affichage de ${observationsToDisplay.length} observations.`);
 
   if (observationsToDisplay.length === 0) {
     statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné.`;
@@ -241,7 +253,8 @@ function displayObservations(observationsToDisplay) {
   }
 
   observationsToDisplay.forEach(obs => {
-    if (obs.decimalLatitude && obs.decimalLongitude) {
+    // Vérifie si decimalLatitude et decimalLongitude sont des nombres valides avant de créer le marqueur
+    if (typeof obs.decimalLatitude === 'number' && typeof obs.decimalLongitude === 'number' && !isNaN(obs.decimalLatitude) && !isNaN(obs.decimalLongitude)) {
       L.circleMarker([obs.decimalLatitude, obs.decimalLongitude], {
         radius: 4,
         color: '#007bff',
@@ -250,6 +263,8 @@ function displayObservations(observationsToDisplay) {
         weight: 1
       }).bindPopup(`<b>${obs.scientificName || 'Nom inconnu'}</b><br>Source: GBIF<br>Latitude: ${obs.decimalLatitude}<br>Longitude: ${obs.decimalLongitude}`)
         .addTo(observationMarkers);
+    } else {
+        console.warn('Coordonnées d\'observation invalides, marqueur non créé:', obs);
     }
   });
 
