@@ -82,7 +82,7 @@ document.getElementById('save').addEventListener('click', async () => {
 let allObservations = [];
 let selectedPoint = null; // Stocke les coordonnées du point sélectionné par clic droit
 let selectedPointMarker = null; // Marqueur visuel pour le point sélectionné
-const ANALYSIS_RADIUS_KM = 40; // Rayon de 40 km pour l'analyse
+const ANALYSIS_RADIUS_KM = 20; // Rayon de 20 km pour l'analyse (MODIFIÉ DE 40 À 20)
 
 // Gestion du clic droit pour sélectionner un point d'intérêt
 map.on('contextmenu', function(e) {
