@@ -11,26 +11,37 @@
     #map { height: 80vh; margin-bottom: 10px; border-radius: 5px; }
     .controls { display: flex; gap: 10px; margin: 10px 0; align-items: center; }
     .controls input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-    .controls button, #save, #analyze-button { padding: 8px 12px; border: none; border-radius: 4px; background-color: #28a745; color: white; cursor: pointer; }
+    .controls button, #save { padding: 8px 12px; border: none; border-radius: 4px; background-color: #28a745; color: white; cursor: pointer; }
     #save { background-color: #007bff; }
-    #analyze-button { background-color: #ffc107; color: black; }
     #status-message { margin-top: 10px; font-family: monospace; }
+    /* Styles pour le bouton OK/Annuler dans le popup Leaflet */
+    .leaflet-popup-content button {
+        margin: 5px;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .leaflet-popup-content button.ok-button {
+        background-color: #28a745;
+        color: white;
+    }
+    .leaflet-popup-content button.cancel-button {
+        background-color: #dc3545;
+        color: white;
+    }
   </style>
 </head>
 <body>
   <h1>FloreApp</h1>
-  <p>Les zones rouges correspondent aux hotspots. Recherchez une espèce pour afficher ses observations sur la carte.</p>
-  <p>Faites un clic droit sur la carte pour sélectionner un point d'intérêt, puis cliquez sur "Lancer l'analyse de proximité".</p>
+  <p>Les zones rouges correspondent aux hotspots. Recherchez une espèce pour collecter ses observations.</p>
+  <p>Faites un clic droit sur la carte pour sélectionner un point d'intérêt. Une fenêtre apparaîtra pour lancer l'analyse de proximité et afficher les observations dans un rayon de 20 km.</p>
 
   <div class="controls">
     <input type="text" id="species-input" placeholder="Nom scientifique de l'espèce..." size="30">
-    <button id="search-species">Afficher les observations</button>
+    <button id="search-species">Rechercher les observations</button>
   </div>
   
-  <div class="controls">
-    <button id="analyze-button" disabled>Lancer l'analyse de proximité</button>
-  </div>
-
   <div id="map"></div>
   <button id="save">Sauvegarder l'itinéraire</button>
   <div id="status-message"></div>
