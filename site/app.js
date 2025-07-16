@@ -82,7 +82,7 @@ document.getElementById('save').addEventListener('click', async () => {
 let allObservations = [];
 let selectedPoint = null; // Stocke les coordonnées du point sélectionné par clic droit
 let selectedPointMarker = null; // Marqueur visuel pour le point sélectionné
-const ANALYSIS_RADIUS_KM = 20; // Rayon de 20 km pour l'analyse (MODIFIÉ DE 40 À 20)
+const ANALYSIS_RADIUS_KM = 20; // Rayon de 20 km pour l'analyse
 
 // Gestion du clic droit pour sélectionner un point d'intérêt
 map.on('contextmenu', function(e) {
@@ -94,17 +94,71 @@ map.on('contextmenu', function(e) {
     map.removeLayer(selectedPointMarker);
   }
   // Ajoute un nouveau marqueur pour le point sélectionné
-  selectedPointMarker = L.marker(selectedPoint).addTo(map)
-    .bindPopup(`Point d'analyse sélectionné ici:<br>Lat: ${selectedPoint.lat.toFixed(4)}, Lng: ${selectedPoint.lng.toFixed(4)}`)
-    .openPopup();
+  selectedPointMarker = L.marker(selectedPoint).addTo(map);
 
-  statusMessage.textContent = `Point sélectionné: Latitude ${selectedPoint.lat.toFixed(4)}, Longitude ${selectedPoint.lng.toFixed(4)}. Cliquez sur "Lancer l'analyse de proximité".`;
-  statusMessage.style.color = 'blue';
-  document.getElementById('analyze-button').disabled = false; // Activer le bouton d'analyse
+  // Création du contenu du popup
+  const popupContent = `
+    <div>
+        <p>Afficher les observations dans un rayon de ${ANALYSIS_RADIUS_KM} km ici ?</p>
+        <button class="ok-button">OK</button>
+        <button class="cancel-button">Annuler</button>
+    </div>
+  `;
+
+  const popup = L.popup()
+    .setLatLng(selectedPoint)
+    .setContent(popupContent)
+    .openOn(map);
+
+  // Ajout des écouteurs d'événements aux boutons du popup
+  const okButton = popup.getElement().querySelector('.ok-button');
+  const cancelButton = popup.getElement().querySelector('.cancel-button');
+
+  okButton.addEventListener('click', () => {
+    console.log('Bouton "OK" du popup cliqué.');
+    map.closePopup(popup); // Ferme le popup
+
+    if (allObservations.length === 0) {
+        statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces pour pouvoir les filtrer.';
+        statusMessage.style.color = 'orange';
+        console.warn('Tentative d\'analyse sans observations préalablement recherchées.');
+        return;
+    }
+
+    statusMessage.textContent = `Analyse en cours pour les observations dans un rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné...`;
+    statusMessage.style.color = 'blue';
+    console.log(`Filtrage des observations autour de [${selectedPoint.lat}, ${selectedPoint.lng}] avec un rayon de ${ANALYSIS_RADIUS_KM} km.`);
+
+    const filteredObservations = allObservations.filter(obs => {
+        if (obs.decimalLatitude && obs.decimalLongitude) {
+            const obsCoords = { lat: obs.decimalLatitude, lng: obs.decimalLongitude };
+            const distance = haversineDistance(selectedPoint, obsCoords);
+            return distance <= ANALYSIS_RADIUS_KM;
+        }
+        return false;
+    });
+
+    console.log(`${filteredObservations.length} observations filtrées.`);
+    displayObservations(filteredObservations);
+    statusMessage.textContent = `${filteredObservations.length} observations affichées dans un rayon de ${ANALYSIS_RADIUS_KM} km.`;
+    statusMessage.style.color = 'green';
+  });
+
+  cancelButton.addEventListener('click', () => {
+    console.log('Bouton "Annuler" du popup cliqué.');
+    map.closePopup(popup); // Ferme le popup
+    if (selectedPointMarker) {
+        map.removeLayer(selectedPointMarker); // Retire le marqueur du point sélectionné
+        selectedPointMarker = null;
+    }
+    selectedPoint = null; // Réinitialise le point sélectionné
+    statusMessage.textContent = 'Analyse de proximité annulée.';
+    statusMessage.style.color = 'grey';
+  });
 });
 
 document.getElementById('search-species').addEventListener('click', async () => {
-  console.log('Bouton "Afficher les observations" cliqué.');
+  console.log('Bouton "Rechercher les observations" cliqué.');
   const speciesName = document.getElementById('species-input').value.trim();
   if (!speciesName) {
     statusMessage.textContent = 'Veuillez entrer un nom d\'espèce.';
@@ -117,7 +171,7 @@ document.getElementById('search-species').addEventListener('click', async () => 
   statusMessage.style.color = 'blue';
   console.log(`Recherche GBIF pour: ${speciesName}`);
 
-  // Effacer les marqueurs précédents et les observations stockées
+  // Effacer les marqueurs précédents (sauf le point sélectionné s'il existe)
   observationMarkers.clearLayers();
   allObservations = []; 
 
@@ -138,12 +192,11 @@ document.getElementById('search-species').addEventListener('click', async () => 
       return;
     }
 
-    statusMessage.textContent = `${allObservations.length} observations trouvées pour "${speciesName}". Sélectionnez un point sur la carte pour affiner l'analyse.`;
+    statusMessage.textContent = `${allObservations.length} observations trouvées pour "${speciesName}". Faites un clic droit sur la carte pour lancer l'analyse de proximité.`;
     statusMessage.style.color = 'green';
 
-    // Afficher toutes les observations initialement après une recherche.
-    // C'est souvent le comportement attendu par l'utilisateur.
-    displayObservations(allObservations, false); // Le second paramètre indique de ne pas afficher le message de rayon ici.
+    // Ne plus afficher toutes les observations globalement après une recherche.
+    // L'affichage est désormais déclenché par l'analyse de proximité via le clic droit.
 
   } catch (error) {
     console.error("Erreur lors de la récupération des observations GBIF:", error);
@@ -172,18 +225,14 @@ function haversineDistance(coords1, coords2) {
 }
 
 // Fonction pour afficher les observations sur la carte
-function displayObservations(observationsToDisplay, showRadiusMessage = true) {
+function displayObservations(observationsToDisplay) {
   observationMarkers.clearLayers(); // Nettoyer les marqueurs existants
   console.log(`Affichage de ${observationsToDisplay.length} observations.`);
 
   if (observationsToDisplay.length === 0) {
-    if (showRadiusMessage) {
-        statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné.`;
-        statusMessage.style.color = 'orange';
-    } else {
-        statusMessage.textContent = `Aucune observation à afficher.`; // Cas où il n'y a rien du tout
-        statusMessage.style.color = 'orange';
-    }
+    statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné.`;
+    statusMessage.style.color = 'orange';
+    // Si selectedPointMarker existe, on le laisse visible pour montrer le point d'analyse.
     return;
   }
 
@@ -200,45 +249,15 @@ function displayObservations(observationsToDisplay, showRadiusMessage = true) {
     }
   });
 
-  // Ajuster la vue de la carte pour inclure toutes les observations affichées
+  // Ajuster la vue de la carte pour inclure toutes les observations affichées ET le point sélectionné
   if (observationMarkers.getLayers().length > 0) {
-    map.fitBounds(observationMarkers.getBounds().pad(0.1));
+    const bounds = observationMarkers.getBounds();
+    if (selectedPointMarker) {
+        bounds.extend(selectedPointMarker.getLatLng());
+    }
+    map.fitBounds(bounds.pad(0.1));
+  } else if (selectedPointMarker) {
+      // Si aucune observation filtrée mais un point sélectionné, centrer sur le point
+      map.setView(selectedPointMarker.getLatLng(), map.getZoom());
   }
 }
-
-// Gestion du bouton "Lancer l'analyse de proximité"
-document.getElementById('analyze-button').addEventListener('click', () => {
-  console.log('Bouton "Lancer l\'analyse de proximité" cliqué.');
-  if (!selectedPoint) {
-    statusMessage.textContent = 'Veuillez d\'abord sélectionner un point sur la carte avec un clic droit.';
-    statusMessage.style.color = 'red';
-    console.warn('Tentative d\'analyse sans point sélectionné.');
-    return;
-  }
-
-  if (allObservations.length === 0) {
-    statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces pour pouvoir les filtrer.';
-    statusMessage.style.color = 'orange';
-    console.warn('Tentative d\'analyse sans observations préalablement recherchées.');
-    return;
-  }
-
-  statusMessage.textContent = `Analyse en cours pour les observations dans un rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné...`;
-  statusMessage.style.color = 'blue';
-  console.log(`Filtrage des observations autour de [${selectedPoint.lat}, ${selectedPoint.lng}] avec un rayon de ${ANALYSIS_RADIUS_KM} km.`);
-
-  const filteredObservations = allObservations.filter(obs => {
-    if (obs.decimalLatitude && obs.decimalLongitude) {
-      const obsCoords = { lat: obs.decimalLatitude, lng: obs.decimalLongitude };
-      const distance = haversineDistance(selectedPoint, obsCoords);
-      // console.log(`Obs: [${obs.decimalLatitude}, ${obs.decimalLongitude}], Dist: ${distance.toFixed(2)} km`); // Débogage des distances
-      return distance <= ANALYSIS_RADIUS_KM;
-    }
-    return false;
-  });
-
-  console.log(`${filteredObservations.length} observations filtrées.`);
-  displayObservations(filteredObservations);
-  statusMessage.textContent = `${filteredObservations.length} observations affichées dans un rayon de ${ANALYSIS_RADIUS_KM} km.`;
-  statusMessage.style.color = 'green';
-});
