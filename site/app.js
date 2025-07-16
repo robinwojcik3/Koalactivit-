@@ -121,9 +121,12 @@ map.on('contextmenu', function(e) {
     if (allObservations.length === 0) {
         statusMessage.textContent = 'Veuillez d\'abord rechercher des observations d\'espèces pour pouvoir les filtrer.';
         statusMessage.style.color = 'orange';
-        console.warn('Tentative d\'analyse sans observations préalablement recherchées.');
+        console.warn('Tentative d\'analyse sans observations préalablement recherchées (allObservations est vide).');
         return;
     }
+    
+    console.log(`Nombre total d'observations disponibles avant filtrage: ${allObservations.length}`);
+
 
     statusMessage.textContent = `Analyse en cours pour les observations dans un rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné...`;
     statusMessage.style.color = 'blue';
@@ -133,6 +136,7 @@ map.on('contextmenu', function(e) {
         if (obs.decimalLatitude && obs.decimalLongitude) {
             const obsCoords = { lat: obs.decimalLatitude, lng: obs.decimalLongitude };
             const distance = haversineDistance(selectedPoint, obsCoords);
+            // console.log(`Obs: [${obs.decimalLatitude}, ${obs.decimalLongitude}], Dist: ${distance.toFixed(2)} km`); // Débogage des distances
             return distance <= ANALYSIS_RADIUS_KM;
         }
         return false;
@@ -173,7 +177,7 @@ document.getElementById('search-species').addEventListener('click', async () => 
 
   // Effacer les marqueurs précédents (sauf le point sélectionné s'il existe)
   observationMarkers.clearLayers();
-  allObservations = []; 
+  allObservations = []; // Réinitialiser avant chaque nouvelle recherche
 
   try {
     const response = await fetch(`/.netlify/functions/gbif-proxy?scientificName=${encodeURIComponent(speciesName)}`);
@@ -227,7 +231,7 @@ function haversineDistance(coords1, coords2) {
 // Fonction pour afficher les observations sur la carte
 function displayObservations(observationsToDisplay) {
   observationMarkers.clearLayers(); // Nettoyer les marqueurs existants
-  console.log(`Affichage de ${observationsToDisplay.length} observations.`);
+  console.log(`displayObservations: Affichage de ${observationsToDisplay.length} observations.`);
 
   if (observationsToDisplay.length === 0) {
     statusMessage.textContent = `Aucune observation trouvée dans le rayon de ${ANALYSIS_RADIUS_KM} km autour du point sélectionné.`;
