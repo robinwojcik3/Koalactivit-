@@ -3,22 +3,14 @@ const fetch = require('node-fetch');
 const GBIF_API_BASE = 'https://api.gbif.org/v1';
 
 /**
- * Fonction serverless pour agir comme un proxy vers l'API GBIF.
- * Elle ajoute l'authentification de base requise pour les appels authentifiés.
+ * Fonction serverless agissant comme un simple proxy vers l'API GBIF
+ * pour contourner les restrictions CORS du navigateur.
+ * Aucune authentification n'est requise pour cet endpoint public.
  */
 exports.handler = async (event) => {
-  // Récupération des identifiants depuis les variables d'environnement Netlify
-  const gbifUser = process.env.GBIF_USER;
-  const gbifPassword = process.env.GBIF_PASSWORD; // Votre clé API peut servir de mot de passe
-
-  if (!gbifUser || !gbifPassword) {
-    return {
-      statusCode: 500,
-      body: 'Configuration serveur incomplète: identifiants GBIF manquants.',
-    };
-  }
-
+  // Extraction des paramètres de la requête du client
   const { scientificName, limit = 200 } = event.queryStringParameters;
+
   if (!scientificName) {
     return {
       statusCode: 400,
@@ -26,7 +18,7 @@ exports.handler = async (event) => {
     };
   }
 
-  // Construction de l'URL pour la recherche d'occurrences
+  // Construction de l'URL pour la recherche d'occurrences publiques
   const params = new URLSearchParams({
     scientificName,
     hasCoordinate: 'true',
@@ -34,28 +26,21 @@ exports.handler = async (event) => {
   });
   const url = `${GBIF_API_BASE}/occurrence/search?${params.toString()}`;
 
-  // Encodage des identifiants pour l'en-tête d'authentification Basic
-  const credentials = Buffer.from(`${gbifUser}:${gbifPassword}`).toString('base64');
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-      },
-    });
+    // Appel direct à l'API GBIF sans authentification
+    const response = await fetch(url);
+    const data = await response.text(); // Lire en tant que texte pour transférer la réponse brute
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      return { statusCode: response.status, body: `Erreur de l'API GBIF: ${errorBody}` };
-    }
-
-    const data = await response.json();
+    // Transférer la réponse de GBIF (succès ou erreur) au client
     return {
-      statusCode: 200,
+      statusCode: response.status,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: data,
     };
   } catch (error) {
-    return { statusCode: 500, body: `Erreur interne du proxy: ${error.message}` };
+    return {
+      statusCode: 500,
+      body: `Erreur interne du proxy: ${error.message}`,
+    };
   }
 };
