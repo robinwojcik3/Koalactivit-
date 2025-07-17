@@ -220,7 +220,11 @@ map.on('contextmenu', async function(e) {
     try {
       // Appel à la fonction Netlify pour toutes les espèces prédéfinies
       // Le paramètre scientificNames doit être un tableau JSON stringifié
-      const response = await fetch(`/.netlify/functions/gbif-proxy?scientificNames=${encodeURIComponent(JSON.stringify(PREDEFINED_SPECIES))}`);
+      const response = await fetch('/.netlify/functions/gbif-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scientificNames: PREDEFINED_SPECIES })
+      });
       console.log('Réponse du proxy GBIF reçue.');
 
       if (!response.ok) {

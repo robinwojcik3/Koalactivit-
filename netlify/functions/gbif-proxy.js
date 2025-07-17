@@ -1,17 +1,35 @@
 const fetch = require('node-fetch'); // Importation de node-fetch pour les requêtes HTTP
 
 exports.handler = async function(event, context) {
-  // Vérifie que la méthode est GET et qu'il y a des paramètres de requête
-  if (event.httpMethod !== 'GET' || !event.queryStringParameters) {
+  // Autorise les méthodes GET ou POST
+  if (event.httpMethod !== 'GET' && event.httpMethod !== 'POST') {
     return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Méthode non supportée ou paramètres manquants.' }),
+      statusCode: 405,
+      body: JSON.stringify({ message: 'Méthode non supportée.' }),
     };
   }
 
-  // Récupère les noms scientifiques depuis les paramètres de la requête
-  // S'attend à une chaîne JSON d'un tableau de noms, par exemple: ?scientificNames=["Abies alba","Acer pseudoplatanus"]
-  const scientificNamesParam = event.queryStringParameters.scientificNames;
+  // Récupère les noms scientifiques depuis le body pour POST ou les paramètres pour GET
+  let scientificNamesParam;
+  if (event.httpMethod === 'GET') {
+    if (!event.queryStringParameters) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Paramètres manquants.' }),
+      };
+    }
+    scientificNamesParam = event.queryStringParameters.scientificNames;
+  } else {
+    try {
+      const body = JSON.parse(event.body || '{}');
+      scientificNamesParam = body.scientificNames;
+    } catch (e) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Corps de requête JSON invalide.' }),
+      };
+    }
+  }
 
   if (!scientificNamesParam) {
     return {
