@@ -1,6 +1,13 @@
 # Koala Activités
 
-Ce dépôt contient une ébauche d'application visant à identifier des lieux favorables aux activités de Koala (FloreApp) et à enregistrer des itinéraires personnalisés.
+Application autonome pour identifier des lieux favorables aux activités de Koala (FloreApp) et enregistrer des itinéraires personnalisés.
+
+## 🚀 Caractéristiques clés
+
+- **100% autonome** : Toutes les dépendances sont incluses dans le dépôt
+- **Sans installation** : Aucune dépendance système requise
+- **Portable** : Fonctionne immédiatement après clonage
+- **Hors-ligne** : Ne dépend d'aucun service externe
 
 ## Étapes clés du projet
 
@@ -22,24 +29,61 @@ Un script Python (`FloreApp/gbif_hotspots.py`) automatise ces étapes et produit
 9. **Préparation de la sauvegarde** : encoder le fichier GeoJSON en Base64 et préparer la requête pour l'API GitHub avec un message de commit.
 10. **Commit via API** : envoyer la requête PUT finale pour créer ou mettre à jour le fichier de l'itinéraire dans le dépôt distant.
 
-## Démarrage de FloreApp
+## 🚀 Démarrage rapide
 
-Le dossier [`FloreApp`](FloreApp/) contient les premiers scripts et la documentation pour démarrer l'application.
-
-Une commande utilitaire `gbif_hotspots.py` permet de télécharger les occurrences
-des espèces de plantes utilisées par les koalas via l'API GBIF puis de calculer
-les dix zones de plus forte densité. Le résultat est sauvegardé dans
-`hotspots.geojson` et peut être affiché sur la carte web.
-
-## Déploiement sur Netlify
-
-Une configuration minimale est fournie pour mettre l'application en ligne. Le dossier `site` contient la page web et les fonctions Netlify se trouvent dans `netlify/functions`.
-
-1. Installez les dépendances Node :
+1. **Cloner le dépôt**
    ```bash
-   npm install
+   git clone [URL_DU_REPO]
+   cd Koalactivit-
    ```
-2. Configurez les variables d'environnement requises (`GITHUB_TOKEN`, `REPO_OWNER`, `REPO_NAME`) dans l'interface Netlify.
-3. Déployez le dépôt sur Netlify. Aucun processus de build complexe n'est nécessaire, la commande `npm run build` ne fait qu'indiquer la fin du build.
 
-L'application sera accessible depuis l'URL fournie par Netlify et permettra de tracer puis sauvegarder un itinéraire directement dans votre dépôt GitHub.
+2. **Lancer l'application**
+   ```bash
+   # Sur Windows
+   .\start.bat
+   
+   # Sur macOS/Linux
+   chmod +x start.sh
+   ./start.sh
+   ```
+
+3. **Ouvrir dans le navigateur**
+   - Allez sur http://localhost:8888
+
+## 📂 Structure du projet
+
+```
+.
+├── FloreApp/           # Scripts Python pour l'analyse des données
+├── node_modules/       # Dépendances Node.js (créé automatiquement)
+├── site/               # Interface utilisateur web
+├── .env.example        # Exemple de configuration
+├── agent.md            # Directives de développement
+├── local-server.js     # Serveur de développement intégré
+├── package.json        # Configuration Node.js
+└── README.md           # Ce fichier
+```
+
+## 🔧 Développement
+
+### Prérequis
+
+- Aucune installation requise (tout est inclus)
+- Pour le développement : Node.js et Python (uniquement pour modifier le code source)
+
+### Commandes utiles
+
+```bash
+# Démarrer le serveur de développement
+npm run dev
+
+# Générer les hotspots (nécessite Python)
+python FloreApp/gbif_hotspots.py
+
+# Installer les dépendances (si modification du code)
+npm install
+```
+
+## 📝 Directives de développement
+
+Consultez [agent.md](agent.md) pour les directives complètes sur le développement autonome.
