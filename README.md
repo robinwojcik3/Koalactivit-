@@ -54,6 +54,8 @@ Un script Python (`FloreApp/gbif_hotspots.py`) automatise ces étapes et produit
 
 ```
 .
+├── Data scraping/       # Scripts de web scraping pour les données de biodiversité
+│   └── Biodiv'AURA scraping script.py  # Script pour télécharger les données de Biodiv'AURA
 ├── FloreApp/           # Scripts Python pour l'analyse des données
 ├── node_modules/       # Dépendances Node.js (créé automatiquement)
 ├── site/               # Interface utilisateur web
@@ -83,6 +85,42 @@ python FloreApp/gbif_hotspots.py
 # Installer les dépendances (si modification du code)
 npm install
 ```
+
+## 🌿 Scraping des données Biodiv'AURA
+
+Le script `Data scraping/Biodiv'AURA scraping script.py` permet de télécharger automatiquement les données d'occurrence d'espèces depuis le portail Biodiv'AURA.
+
+### Prérequis
+
+- Python 3.7+
+- Navigateur Chrome installé
+- Compte Biodiv'AURA (les identifiants sont nécessaires dans le script)
+
+### Installation des dépendances
+
+```bash
+pip install pandas selenium webdriver-manager openpyxl
+```
+
+### Utilisation
+
+1. Mettez à jour les variables suivantes dans le script :
+   - `AURA_USERNAME` : Votre nom d'utilisateur Biodiv'AURA
+   - `AURA_PASSWORD` : Votre mot de passe Biodiv'AURA
+   - `EXCEL_PATH` : Chemin vers votre fichier Excel contenant la liste des taxons
+   - `DOWNLOAD_DIR` : Dossier de destination pour les fichiers téléchargés
+   - `DEPARTEMENT_TEXTE` : Le département cible (ex: "Isere")
+
+2. Exécutez le script :
+   ```bash
+   python "Data scraping/Biodiv'AURA scraping script.py"
+   ```
+
+Le script va automatiquement :
+- Se connecter à Biodiv'AURA
+- Parcourir la liste des taxons
+- Effectuer une recherche pour chaque taxon dans le département spécifié
+- Télécharger les données au format shapefile
 
 ## 📝 Directives de développement
 
