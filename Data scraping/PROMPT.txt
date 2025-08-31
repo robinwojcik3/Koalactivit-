@@ -21,7 +21,9 @@ https://donnees.biodiversite-auvergne-rhone-alpes.fr/#/synthese
 5) On appuie sur entrée (clavier) pour valider
 
 5) on clique la :
-<input aria-autocomplete="list" type="text" autocorrect="off" autocapitalize="off" autocomplete="a12f1db2ba7f">
+<input aria-autocomplete="list" type="text" autocorrect="off" autocapitalize="off" autocomplete="a01311f1b606" aria-activedescendant="a01311f1b606-0" aria-controls="a01311f1b606">
+
+
 
 6) On colle e texte 'Isere'
 
