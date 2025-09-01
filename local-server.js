@@ -8,6 +8,10 @@ const { Octokit } = require('@octokit/rest');
 const app = express();
 const PORT = process.env.PORT || 8888;
 
+// In-memory cache
+const cache = new Map();
+const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+
 // Middlewares
 app.use(express.json({ limit: '2mb' }));
 
@@ -52,10 +56,18 @@ app.get('/.netlify/functions/gbif-proxy', async (req, res) => {
   let allResults = [];
   let successCount = 0;
   let failCount = 0;
+  let cacheHitCount = 0;
 
   try {
     const resultsPerSpecies = await Promise.all(
       scientificNames.map(async (name) => {
+        const cachedEntry = cache.get(name);
+        if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_DURATION_MS)) {
+          cacheHitCount++;
+          successCount++;
+          return cachedEntry.data;
+        }
+
         const gbifApiUrl = `https://api.gbif.org/v1/occurrence/search?scientificName=${encodeURIComponent(name)}&hasCoordinate=true&limit=1000`;
         try {
           const response = await fetch(gbifApiUrl);
@@ -67,6 +79,7 @@ app.get('/.netlify/functions/gbif-proxy', async (req, res) => {
           }
           const data = await response.json();
           if (data && Array.isArray(data.results)) {
+            cache.set(name, { data: data.results, timestamp: Date.now() });
             successCount++;
             return data.results;
           } else {
@@ -85,7 +98,7 @@ app.get('/.netlify/functions/gbif-proxy', async (req, res) => {
       if (results) allResults = allResults.concat(results);
     });
 
-    console.log(`Requêtes GBIF terminées. Succès: ${successCount}, Échecs: ${failCount}. Total: ${allResults.length}`);
+    console.log(`Requêtes GBIF terminées. Succès: ${successCount}, Échecs: ${failCount}, Cache hits: ${cacheHitCount}. Total: ${allResults.length}`);
     return res.status(200).json({ results: allResults });
   } catch (e) {
     console.error('Erreur interne gbif-proxy:', e);
