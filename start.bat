@@ -1,13 +1,24 @@
 @echo off
-REM Script de démarrage pour Windows
+echo === Démarrage de Koalactivit ===
+echo.
 
-echo Installation des dépendances Node.js...
-call npm install
-
-if exist "FloreApp\requirements.txt" (
-    echo Installation des dépendances Python...
-    pip install -r "FloreApp\requirements.txt"
+REM Vérifier si l'environnement est configuré
+if not exist ".venv" (
+    echo L'environnement n'est pas configuré. Lancement du setup...
+    call setup.bat
+    if %errorlevel% neq 0 exit /b 1
 )
 
-echo Démarrage du serveur...
-node local-server.js
+if not exist "node_modules" (
+    echo Les dépendances Node.js ne sont pas installées. Lancement du setup...
+    call setup.bat
+    if %errorlevel% neq 0 exit /b 1
+)
+
+echo Activation de l'environnement virtuel Python...
+call .venv\Scripts\activate
+
+echo Lancement du serveur local...
+npm run dev
+
+pause

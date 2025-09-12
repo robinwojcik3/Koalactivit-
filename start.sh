@@ -1,13 +1,27 @@
 #!/bin/bash
-# Script de démarrage pour Linux/macOS
 
-echo "Installation des dépendances Node.js..."
-npm install
+echo "=== Démarrage de Koalactivit ==="
+echo
 
-if [ -f "FloreApp/requirements.txt" ]; then
-    echo "Installation des dépendances Python..."
-    pip install -r "FloreApp/requirements.txt"
+# Vérifier si l'environnement est configuré
+if [ ! -d ".venv" ]; then
+    echo "L'environnement n'est pas configuré. Lancement du setup..."
+    ./setup.sh
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
 fi
 
-echo "Démarrage du serveur..."
-node local-server.js
+if [ ! -d "node_modules" ]; then
+    echo "Les dépendances Node.js ne sont pas installées. Lancement du setup..."
+    ./setup.sh
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+fi
+
+echo "Activation de l'environnement virtuel Python..."
+source .venv/bin/activate
+
+echo "Lancement du serveur local..."
+npm run dev
