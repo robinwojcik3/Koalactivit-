@@ -9,7 +9,8 @@
       "Bash(tree:*)",
       "Bash(for dir in config data docker docs logs scripts web PROMPT)",
       "Bash(ls:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(do echo -e \"\\n$dir:\")"
     ],
     "deny": [],
     "ask": []
