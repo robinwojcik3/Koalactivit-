@@ -1,42 +1,42 @@
-# Configuration des commandes personnalisées Claude Code
+﻿# Configuration des commandes personnalisÃ©es Claude Code
 
-Ce guide explique comment créer des slash‑commands personnalisées pour Claude Code dans ce projet.
+Ce guide explique comment crÃ©er des slashâ€‘commands personnalisÃ©es pour Claude Code dans ce projet.
 
 ## Structure
 
 - Dossier projet pour les commandes: `.claude/commands/`
 - Un fichier Markdown (`*.md`) par commande
-- Le contenu du fichier est le prompt exécuté quand la commande est appelée
+- Le contenu du fichier est le prompt exÃ©cutÃ© quand la commande est appelÃ©e
 
-## Portée des commandes
+## PortÃ©e des commandes
 
-| Type | Emplacement | Utilisateurs | Préfixe dans `/help` |
+| Type | Emplacement | Utilisateurs | PrÃ©fixe dans `/help` |
 |------|-------------|--------------|----------------------|
 | Projet | `./.claude/commands/` | Tous les membres du repo | Affiche `(project)` |
 | Personnel | `~/.claude/commands/` | Toi uniquement | Affiche `(user)` |
 
-## Syntaxe d’un fichier de commande
+## Syntaxe dâ€™un fichier de commande
 
 Chaque fichier `.md` peut contenir:
 
-- Frontmatter YAML (optionnel) en tête pour définir:
+- Frontmatter YAML (optionnel) en tÃªte pour dÃ©finir:
   - `description`: courte description
   - `argument-hint`: aide sur les arguments (ex: `[arg1] [arg2]`)
-  - `allowed-tools`: liste d’outils/commandes autorisés (ex: `Bash(git diff:*)`)
-  - `model`: (optionnel) modèle à forcer pour cette commande
-- Corps du prompt: texte envoyé à Claude lors de l’exécution; peut inclure:
+  - `allowed-tools`: liste dâ€™outils/commandes autorisÃ©s (ex: `Bash(git diff:*)`)
+  - `model`: (optionnel) modÃ¨le Ã  forcer pour cette commande
+- Corps du prompt: texte envoyÃ© Ã  Claude lors de lâ€™exÃ©cution; peut inclure:
   - `$ARGUMENTS` pour tous les arguments
-  - `$1`, `$2`, … pour les arguments positionnels
-  - Références de fichiers avec `@chemin/vers/fichier`
-- Pré‑commandes shell (optionnel): lignes commençant par `!` si l’outil est listé dans `allowed-tools`
+  - `$1`, `$2`, â€¦ pour les arguments positionnels
+  - RÃ©fÃ©rences de fichiers avec `@chemin/vers/fichier`
+- PrÃ©â€‘commandes shell (optionnel): lignes commenÃ§ant par `!` si lâ€™outil est listÃ© dans `allowed-tools`
 
 ## Exemple de commande
 
-Créer le fichier `.claude/commands/review-pr.md`:
+CrÃ©er le fichier `.claude/commands/review-pr.md`:
 
 ```markdown
 ---
-description: "Analyse un PR pour performance, sécurité et style"
+description: "Analyse un PR pour performance, sÃ©curitÃ© et style"
 argument-hint: "[pr-number] [priority] [assignee]"
 allowed-tools:
   - Bash(git status:*)
@@ -54,15 +54,15 @@ Check for security vulnerabilities.
 Suggest style improvements.
 ```
 
-Exécution dans Claude Code:
+ExÃ©cution dans Claude Code:
 
 ```text
 /review-pr 123 high alice
 ```
 
-## Étapes pour ajouter une commande
+## Ã‰tapes pour ajouter une commande
 
-1) Créer le dossier s’il n’existe pas:
+1) CrÃ©er le dossier sâ€™il nâ€™existe pas:
 
 ```bash
 mkdir -p .claude/commands
@@ -70,7 +70,12 @@ mkdir -p .claude/commands
 
 2) Ajouter un fichier Markdown (ex: `ma-commande.md`) dans `.claude/commands/`
 
-3) Remplir le frontmatter + prompt + placeholders nécessaires
+3) Remplir le frontmatter + prompt + placeholders nÃ©cessaires
 
-4) Commit & push pour partager avec l’équipe
+4) Commit & push pour partager avec lâ€™Ã©quipe
 
+
+
+Commandes disponibles:
+- /review-pr — analyse un PR
+- /prompt-plus — améliore un prompt avec le contexte du repo

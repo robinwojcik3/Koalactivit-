@@ -16,15 +16,15 @@ const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 app.use(express.json({ limit: '2mb' }));
 
 // Serve static website
-const siteDir = path.join(__dirname, 'site');
+const siteDir = path.join(__dirname, '..', 'web', 'site');
 app.use(express.static(siteDir));
 
 // Serve hotspots.geojson even if it's not in site/
 app.get('/hotspots.geojson', (req, res) => {
   const candidatePaths = [
     path.join(siteDir, 'hotspots.geojson'),
-    path.join(__dirname, 'FloreApp', 'hotspots.geojson'),
-    path.join(__dirname, 'hotspots.geojson'),
+    path.join(__dirname, '..', 'web', 'FloreApp', 'hotspots.geojson'),
+    path.join(__dirname, '..', 'hotspots.geojson'),
   ];
   for (const p of candidatePaths) {
     if (fs.existsSync(p)) {

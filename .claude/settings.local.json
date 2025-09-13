@@ -4,7 +4,12 @@
       "Bash(chmod:*)",
       "Bash(docker:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(rmdir:*)",
+      "Bash(tree:*)",
+      "Bash(for dir in config data docker docs logs scripts web PROMPT)",
+      "Bash(ls:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
