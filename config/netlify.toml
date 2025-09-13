@@ -1,4 +1,0 @@
-[build]
-  publish = "../web/site"
-  functions = "../web/netlify/functions"
-  command = "npm run build"
