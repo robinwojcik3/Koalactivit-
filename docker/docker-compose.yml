@@ -1,23 +1,23 @@
 services:
   koalactivit:
-    build: 
-      context: .
+    build:
+      context: ..
       dockerfile: Dockerfile
     container_name: koalactivit-app
     ports:
       - "3000:3000"
     volumes:
       # Mount pour le développement - permet de modifier le code sans rebuild
-      - ./FloreApp:/app/FloreApp
-      - ./site:/app/site
-      - ./Data scraping:/app/Data scraping
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - ../FloreApp:/app/FloreApp
+      - ../site:/app/site
+      - ../Data scraping:/app/Data scraping
+      - ../data:/app/data
+      - ../logs:/app/logs
     environment:
       - NODE_ENV=production
       - PYTHONUNBUFFERED=1
     env_file:
-      - .env
+      - ../.env
     restart: unless-stopped
     networks:
       - koala-network

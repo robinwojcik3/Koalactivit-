@@ -139,11 +139,11 @@ def main():
     if platform.system() == "Windows":
         print("  1. Activez l'environnement virtuel: .venv\\Scripts\\activate")
         print("  2. Lancez l'application: npm run dev")
-        print("\nOu utilisez simplement: start.bat")
+        print("\nOu utilisez simplement: scripts\\start.bat")
     else:
         print("  1. Activez l'environnement virtuel: source .venv/bin/activate")
         print("  2. Lancez l'application: npm run dev")
-        print("\nOu utilisez simplement: ./start.sh")
+        print("\nOu utilisez simplement: ./scripts/start.sh")
 
 if __name__ == "__main__":
     main()

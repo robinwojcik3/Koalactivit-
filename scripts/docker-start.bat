@@ -2,25 +2,25 @@
 echo === Lancement de Koalactivit avec Docker ===
 echo.
 
-REM Vérifier si Docker Desktop est en cours d'exécution
+REM Verifier si Docker Desktop est en cours d'execution
 docker version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Docker Desktop n'est pas démarré.
-    echo Démarrage de Docker Desktop...
+    echo Docker Desktop n'est pas demarre.
+    echo Demarrage de Docker Desktop...
     start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     
-    echo Attente du démarrage de Docker (cela peut prendre quelques instants)...
+    echo Attente du demarrage de Docker (cela peut prendre quelques instants)...
     :wait_docker
     timeout /t 5 /nobreak >nul
     docker version >nul 2>&1
     if %errorlevel% neq 0 goto wait_docker
     
-    echo Docker est maintenant prêt!
+    echo Docker est maintenant pret!
     echo.
 )
 
 echo Construction de l'image Docker...
-docker-compose build
+docker-compose -f docker\docker-compose.yml build
 
 if %errorlevel% neq 0 (
     echo.
@@ -31,6 +31,6 @@ if %errorlevel% neq 0 (
 
 echo.
 echo Lancement de l'application...
-docker-compose up
+docker-compose -f docker\docker-compose.yml up
 
 pause

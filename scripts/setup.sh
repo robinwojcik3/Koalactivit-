@@ -3,6 +3,10 @@
 echo "=== Installation de l'environnement Koalactivit ==="
 echo
 
+# Emplacement du script et racine du repo
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${SCRIPT_DIR}/.."
+
 # Vérifier Python
 if ! command -v python3 &> /dev/null; then
     echo "ERREUR: Python3 n'est pas installé"
@@ -17,14 +21,16 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-# Lancer le script de setup Python
+# Lancer le script de setup Python depuis la racine du repo
 echo "Lancement du script de configuration..."
-python3 setup.py
+(
+  cd "$REPO_ROOT" && python3 "${SCRIPT_DIR}/setup.py"
+)
 
 if [ $? -eq 0 ]; then
     echo
     echo "=== Installation terminée avec succès! ==="
-    echo "Pour démarrer l'application, utilisez: ./start.sh"
+    echo "Pour démarrer l'application, utilisez: ./scripts/start.sh"
 else
     echo
     echo "=== Erreur lors de l'installation ==="

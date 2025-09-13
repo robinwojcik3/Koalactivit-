@@ -40,11 +40,11 @@ Un script Python (`FloreApp/gbif_hotspots.py`) automatise ces étapes et produit
 2. **Lancer l'application**
    ```bash
    # Sur Windows
-   .\start.bat
+   .\scripts\start.bat
    
    # Sur macOS/Linux
-   chmod +x start.sh
-   ./start.sh
+   chmod +x scripts/start.sh
+   ./scripts/start.sh
    ```
 
 3. **Ouvrir dans le navigateur**
@@ -54,16 +54,20 @@ Un script Python (`FloreApp/gbif_hotspots.py`) automatise ces étapes et produit
 
 ```
 .
-├── Data scraping/       # Scripts de web scraping pour les données de biodiversité
-│   └── Biodiv'AURA scraping script.py  # Script pour télécharger les données de Biodiv'AURA
-├── FloreApp/           # Scripts Python pour l'analyse des données
-├── node_modules/       # Dépendances Node.js (créé automatiquement)
-├── site/               # Interface utilisateur web
-├── .env.example        # Exemple de configuration
-├── agent.md            # Directives de développement
-├── local-server.js     # Serveur de développement intégré
-├── package.json        # Configuration Node.js
-└── README.md           # Ce fichier
+├── Data scraping/            # Scripts de web scraping biodiversité
+├── FloreApp/                 # Scripts Python d'analyse
+├── site/                     # Interface utilisateur web
+├── netlify/                  # Fonctions Netlify
+├── docker/                   # Dockerfile et docker-compose.yml
+├── scripts/                  # Scripts (start, setup, docker-*)
+├── docs/                     # Documentation, guides et prompts
+├── data/                     # Données locales (ex: lavaldens.txt)
+├── local-server.js           # Serveur de développement intégré
+├── package.json              # Dépendances Node.js
+├── package-lock.json         # Lockfile npm
+├── requirements.txt          # Dépendances Python
+├── netlify.toml              # Configuration Netlify
+└── README.md                 # Ce fichier
 ```
 
 ## 🔧 Développement
@@ -124,4 +128,4 @@ Le script va automatiquement :
 
 ## 📝 Directives de développement
 
-Consultez [agent.md](agent.md) pour les directives complètes sur le développement autonome.
+Consultez [docs/agent.md](docs/agent.md) pour les directives complètes sur le développement autonome.
