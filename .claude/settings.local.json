@@ -10,7 +10,8 @@
       "Bash(for dir in config data docker docs logs scripts web PROMPT)",
       "Bash(ls:*)",
       "Bash(done)",
-      "Bash(do echo -e \"\\n$dir:\")"
+      "Bash(do echo -e \"\\n$dir:\")",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
